@@ -3,23 +3,30 @@
     window.$l = {};
   }
 
-  // Seems to be working fine.
   $l = function (arg) {
     var array = [];
+    var functionArray = [];
     if (arg instanceof HTMLElement) {
       array.push(arg);
       return new DOMNodeCollection(array);
+    } else if (arg instanceof Function) {
+      functionArray.push(arg);
+      document.addEventListener("DOMContentLoaded", function () {
+        functionArray.forEach(function (fn) {
+          fn();
+        });
+      });
+    } else {
+      var list = document.querySelectorAll(arg);
+      array = Array.prototype.slice.call(list);
+      return new DOMNodeCollection(array);
     }
-    var list = document.querySelectorAll(arg);
-    array = Array.prototype.slice.call(list);
-    return new DOMNodeCollection(array);
   };
 
   var DOMNodeCollection = $l.DOMNodeCollection = function (array) {
     this.array = array;
   };
 
-  // Check this again later, but I'm pretty sure this is ok
   DOMNodeCollection.prototype.append = function (arg) {
     if (arg instanceof DOMNodeCollection) {
       arg.array.forEach(function (innerEl) {
@@ -66,16 +73,27 @@
     return null;
   };
 
-  // Need to call all children recursively
-  // I can't figure this out and it should be super simple
-  // This may actually not need recursion, it may just be a while
-  // loop that keeps checking for children like the next largest problem
-  // for binary search trees.
   DOMNodeCollection.prototype.children = function () {
+    var children = [];
+    this.array.forEach(function (el) {
+      if (el.children.length > 0) {
+        findChildren(el, children);
+      }
+    });
 
+    return new DOMNodeCollection(children);
   };
 
-  // Dominated this one.
+  function findChildren(el, children) {
+    if (el.children.length > 0) {
+      var childrenArray = Array.prototype.slice.call(el.children);
+      children = children.concat(childrenArray);
+      childrenArray.forEach(function (child) {
+        findChildren(child, children);
+      });
+    }
+  }
+
   DOMNodeCollection.prototype.empty = function () {
     this.array.forEach(function (el) {
       el.innerHTML = "";
@@ -88,7 +106,6 @@
 
   };
 
-  // Dominated this one.
   DOMNodeCollection.prototype.html = function (string) {
     if (string) {
       this.array.forEach(function (el) {
