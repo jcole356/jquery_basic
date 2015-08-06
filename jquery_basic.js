@@ -23,6 +23,51 @@
     }
   };
 
+  var ajax = $l.ajax = function (options) {
+    var defaults = {
+      success: function () {console.log("Well done!");},
+      error: function () {console.log("Nope!");},
+      url: "https://www.googleapis.com/books/v1/volumes?q=",
+      method: "GET",
+      data: "",
+      contentType: 'application/x-www-form-urlencoded; charset=UTF-8'
+    };
+    if (options) {
+      defaults = extend(defaults, options);
+      if (defaults.data) {
+        defaults.url += defaults.data;
+      }
+    }
+
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+      if (request.status === 200) {
+        defaults.success();
+      } else if (request.status === 404) {
+        defaults.error();
+      }
+    };
+    request.open(defaults.method, defaults.url);
+    request.send();
+    return request;
+  };
+
+  var extend = $l.extend = function () {
+    if (arguments.length < 2) {
+      throw "Must have at least two objects to use extend!";
+    }
+    var newObj = {};
+    var args = Array.prototype.slice.call(arguments);
+    args.forEach(function (obj) {
+      var keys = Object.keys(obj);
+      keys.forEach(function (key) {
+        newObj[key] = obj[key];
+      });
+    });
+
+    return newObj;
+  };
+
   var DOMNodeCollection = $l.DOMNodeCollection = function (array) {
     this.array = array;
   };
@@ -103,8 +148,16 @@
     return this.array[0].innerHTML;
   };
 
+  // I think this is working now...
   DOMNodeCollection.prototype.find = function (selector) {
-    
+    var results = [];
+    var subResults;
+    this.array.forEach(function (el) {
+      subResults = Array.prototype.slice.call(el.querySelectorAll(selector));
+      results = results.concat(subResults);
+    });
+
+    return new DOMNodeCollection(results);
   };
 
   DOMNodeCollection.prototype.html = function (string) {
