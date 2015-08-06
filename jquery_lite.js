@@ -77,22 +77,23 @@
     var children = [];
     this.array.forEach(function (el) {
       if (el.children.length > 0) {
-        findChildren(el, children);
+        children = children.concat(Array.prototype.slice.call(el.children));
       }
     });
 
     return new DOMNodeCollection(children);
   };
 
-  function findChildren(el, children) {
-    if (el.children.length > 0) {
-      var childrenArray = Array.prototype.slice.call(el.children);
-      children = children.concat(childrenArray);
-      childrenArray.forEach(function (child) {
-        findChildren(child, children);
-      });
-    }
-  }
+  DOMNodeCollection.prototype.parent = function () {
+    var parents = [];
+    this.array.forEach(function (el) {
+      if (el.parentNode && parents.indexOf(el.parentNode) === -1) {
+        parents.push(el.parentNode);
+      }
+    });
+
+    return new DOMNodeCollection(parents);
+  };
 
   DOMNodeCollection.prototype.empty = function () {
     this.array.forEach(function (el) {
@@ -103,7 +104,7 @@
   };
 
   DOMNodeCollection.prototype.find = function (selector) {
-
+    
   };
 
   DOMNodeCollection.prototype.html = function (string) {
@@ -128,9 +129,6 @@
     });
   };
 
-  DOMNodeCollection.prototype.parent = function () {
-
-  };
 
   DOMNodeCollection.prototype.remove = function () {
     this.array.forEach(function (el) {
