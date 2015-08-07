@@ -27,7 +27,7 @@
     var defaults = {
       success: function () {console.log("Well done!");},
       error: function () {console.log("Nope!");},
-      url: "https://www.googleapis.com/books/v1/volumes?q=",
+      url: "",
       method: "GET",
       data: "",
       contentType: 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -41,14 +41,14 @@
 
     var request = new XMLHttpRequest();
     request.onreadystatechange = function () {
-      if (request.status === 200) {
-        defaults.success();
+      if (request.status === 200 && request.readyState === 4) {
+        defaults.success(request);
       } else if (request.status === 404) {
-        defaults.error();
+        defaults.error(request);
       }
     };
     request.open(defaults.method, defaults.url);
-    request.send();
+    request.send(defaults.contentType);
     return request;
   };
 
