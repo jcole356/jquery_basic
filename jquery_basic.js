@@ -40,6 +40,8 @@
     }
 
     var request = new XMLHttpRequest();
+    // Looks like there are other ways to do this like on load and
+    // onerror
     request.onreadystatechange = function () {
       if (request.status === 200 && request.readyState === 4) {
         defaults.success(request);
